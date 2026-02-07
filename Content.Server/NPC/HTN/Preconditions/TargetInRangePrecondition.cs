@@ -8,7 +8,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-using Content.Server.Stealth;
+using Content.Shared.Interaction; // goob edit start
+using Content.Server.Stealth; // goob edit end
 using Content.Shared.Stealth.Components;
 using Robust.Shared.Map;
 
@@ -20,34 +21,45 @@ namespace Content.Server.NPC.HTN.Preconditions;
 public sealed partial class TargetInRangePrecondition : HTNPrecondition
 {
     [Dependency] private readonly IEntityManager _entManager = default!;
-    private SharedTransformSystem _transformSystem = default!;
-    private StealthSystem _stealth = default!; // goob edit
+    private SharedTransformSystem _transform = default!;
+    private StealthSystem _stealth = default!; // goob edit start
+    private SharedInteractionSystem _interaction = default!; // goob edit end
 
-    [DataField("targetKey", required: true)] public string TargetKey = default!;
+    [DataField("targetKey", required: true)]
+    public string TargetKey = default!;
 
     [DataField("rangeKey", required: true)]
     public string RangeKey = default!;
+
+    [DataField("isUnobstructed")]
+    public bool IsUnobstructed = false; // goob edit
+
     public override void Initialize(IEntitySystemManager sysManager)
     {
         base.Initialize(sysManager);
-        _transformSystem = sysManager.GetEntitySystem<SharedTransformSystem>();
-        _stealth = sysManager.GetEntitySystem<StealthSystem>(); // goob edit
+        _transform = sysManager.GetEntitySystem<SharedTransformSystem>();
+        _stealth = sysManager.GetEntitySystem<StealthSystem>(); // goob edit start
+        _interaction = sysManager.GetEntitySystem<SharedInteractionSystem>(); // goob edit end
     }
 
     public override bool IsMet(NPCBlackboard blackboard)
     {
-        if (!blackboard.TryGetValue<EntityCoordinates>(NPCBlackboard.OwnerCoordinates, out var coordinates, _entManager))
-            return false;
-
-        if (!blackboard.TryGetValue<EntityUid>(TargetKey, out var target, _entManager)
+        if (!blackboard.TryGetValue<EntityCoordinates>(NPCBlackboard.OwnerCoordinates, out var ownerCoordinates, _entManager)
+        || !blackboard.TryGetValue<EntityUid>(TargetKey, out var target, _entManager)
         || !_entManager.TryGetComponent<TransformComponent>(target, out var targetXform)
         // goob edit - stealthed entities can't be seen by npcs
-        || (_entManager.TryGetComponent<StealthComponent>(target, out var stealth) && _stealth.GetVisibility(target, stealth) <= stealth.ExamineThreshold))
+        || _entManager.TryGetComponent<StealthComponent>(target, out var stealth) && _stealth.GetVisibility(target, stealth) <= stealth.ExamineThreshold)
             return false;
 
+        var range = blackboard.GetValueOrDefault<float>(RangeKey, _entManager);
 
-
-        var transformSystem = _entManager.System<SharedTransformSystem>;
-        return _transformSystem.InRange(coordinates, targetXform.Coordinates, blackboard.GetValueOrDefault<float>(RangeKey, _entManager));
+        if (IsUnobstructed)
+        {
+            return _interaction.InRangeUnobstructed(_transform.ToMapCoordinates(ownerCoordinates), _transform.GetMapCoordinates(targetXform), range); // goob edit
+        }
+        else
+        {
+            return _transform.InRange(ownerCoordinates, targetXform.Coordinates, range);
+        }
     }
 }

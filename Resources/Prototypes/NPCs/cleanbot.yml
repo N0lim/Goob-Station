@@ -32,9 +32,12 @@
             rangeKey: MeleeRange
         - !type:HTNPrimitiveTask
           preconditions:
-            - !type:TargetInRangePrecondition
+            - !type:TargetInLOSPrecondition
               targetKey: Target
-              rangeKey: InteractRange
+              rangeKey: CleanbotCleaningRange
+              #isUnobstructed: true # goob edit
+            - !type:CanInteractWithTargetPrecondition
+              targetKey: Target
           operator: !type:InteractWithOperator
             targetKey: Target
           services:
