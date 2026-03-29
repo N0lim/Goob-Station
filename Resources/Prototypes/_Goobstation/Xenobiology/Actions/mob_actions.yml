@@ -27,3 +27,29 @@
       - Slime
     canTargetSelf: false
     event: !type:SlimeLatchEvent {}
+
+- type: entity
+  parent: BaseAction
+  id: ActionSlimeEatCorpse
+  name: Eat corpse
+  description: Start slowly devour random body part or organ of target.
+  components:
+  - type: Action
+    itemIconStyle: NoItem
+    icon:
+      sprite: _Goobstation/Xenobiology/Actions/actions_slime.rsi
+      state: slimeeat
+    useDelay: 30
+  - type: TargetAction
+    range: 1
+  - type: EntityTargetAction
+    whitelist:
+      components:
+      - MobState
+      - Body
+      - BodyPart
+    blacklist:
+      components:
+      - Slime
+    canTargetSelf: false
+    event: !type:SlimeEatCorpseEvent {}

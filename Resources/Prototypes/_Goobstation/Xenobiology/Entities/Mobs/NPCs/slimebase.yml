@@ -141,6 +141,7 @@
   - type: ActionGrant
     actions:
     - ActionSlimeLatch
+    - ActionSlimeEatCorpse
   - type: HTN
     rootTask:
       task: XenoSlimeCompound

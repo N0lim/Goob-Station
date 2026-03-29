@@ -6,6 +6,10 @@ slime-latch-fail-target-dead = You do not want to consume the {$ent}, it is dead
 
 slime-latch-fail-max-entities = You cannot consume the {$ent}, you are full!
 
+slime-eat-corpse-fail-not-eatable = The {$target} don't look eatable.
+
+slime-eat-corpse-fail-not-dead = The {$target} should be dead!
+
 slime-examined-stomach = [color=red]You can see something moving inside of it![/color]
 
 slime-examined-tamer = [color=green]It looks happy to see you![/color]
